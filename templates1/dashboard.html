@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        h1, textarea, button, a {
+            color: black;
+        }
+        textarea {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Dashboard</h1>
+    <p>Welcome, <strong>{{ user }}</strong></p>
+    <textarea id="note" cols="50" rows="10">{{ note }}</textarea>
+    <button type="button" onclick="savenote()">Save</button>
+    <div id="rezultat"></div>
+    <a href="/logout">Logout</a>
+
+    <script>
+        function savenote() {
+            var notetext = document.getElementById("note").value;
+            $.ajax({
+                url: "/savenote",
+                method: "POST",
+                data: { note: notetext },
+                success: function (odgovor) {
+                    $("#rezultat").text(odgovor);
+                },
+                error: function (xhr) {
+                    $("#rezultat").text("Error saving note: " + xhr.statusText);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
