@@ -8,38 +8,170 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
+            background-color: #f0f2f5;
             font-family: Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        a.logout {
+            background-color: #e74c3c;
             color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
         }
-        h1, textarea, button, a {
-            color: black;
+
+        a.logout:hover {
+            background-color: #c0392b;
         }
+
+        .add-note {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-note h2 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        input[type="text"],
         textarea {
-            background-color: rgba(255, 255, 255, 0.8);
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-family: Arial, sans-serif;
         }
-        button {
+
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        button[type="submit"] {
             background-color: #4CAF50;
             color: white;
             border: none;
             padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 14px;
         }
-        button:hover {
+
+        button[type="submit"]:hover {
             background-color: #45a049;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .note-card {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .note-card h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .note-card p {
+            flex: 1;
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            color: #555;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        a.btn-edit {
+            background-color: #3498db;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        a.btn-edit:hover {
+            background-color: #2980b9;
+        }
+
+        a.btn-delete {
+            background-color: #e74c3c;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        a.btn-delete:hover {
+            background-color: #c0392b;
+        }
+
+        .no-notes {
+            color: #888;
+            font-style: italic;
         }
     </style>
 </head>
 
 <body>
     <h1>Dashboard</h1>
-    <p>Welcome, <strong>{{ user }}</strong></p>
-    <textarea id="note" cols="50" rows="10">{{ note }}</textarea>
-    <button type="button" onclick="savenote()">Save</button>
-    <div id="rezultat"></div>
-    <a href="/logout">Logout</a>
+    <div class="header"></div>
+    <p>Welcome mr. <strong>{{ user }}</strong></p>
+    <a class="logout" href="/logout">Logout</a>
+    </div>
+    <div class="add-note">
+        <h2>Add a new masterpiece(note)</h2>
+        <form action="/addnote" method="POST">
+            <input type="text" name="title" placeholder="Naslov zapiseka" required>
+            <textarea name="content" placeholder="Vsebina zapiska"></textarea>
+            <button type="submit">Dodaj zapisk</button>
+        </form>
+    </div>
+
 
     <script>
         function savenote() {

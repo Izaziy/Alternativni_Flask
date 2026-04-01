@@ -1,3 +1,5 @@
+import time
+
 from flask import Flask, render_template, request, redirect, session
 from tinydb import TinyDB, Query
 
@@ -6,7 +8,9 @@ app.secret_key = "superskrivnostnikljuc"
 
 db = TinyDB("db.json")
 users = db.table("users")
+notes = db.table("notes")
 User = Query()
+Note = Query()
 
 @app.route("/")
 def home():
@@ -52,11 +56,27 @@ def login():
 def dashboard():
     if "user" not in session:
         return redirect("/login")
+ 
+    user_notes = notes.search(Note.username == session["user"])
+    return render_template("dashboard.html", user=session["user"], notes=user_notes)
 
-    user_data = users.get(User.username == session["user"])
-    note = (user_data or {}).get("note", "")
-
-    return render_template("dashboard.html", user=session["user"], note=note)
+@app.route("/addnote", methods=["POST"])
+def addnote():
+    if "user" not in session:
+        return redirect("/login")
+ 
+    title = request.form.get("title", "").strip()
+    content = request.form.get("content", "").strip()
+ 
+    if title:
+        notes.insert({
+            "username": session["user"],
+            "title": title,
+            "content": content,
+            "id": str(int(time.time() * 1000))
+        })
+ 
+    return redirect("/dashboard")
 
 @app.route("/savenote", methods=["POST"])
 def savenote():
@@ -64,8 +84,35 @@ def savenote():
         return redirect("/login")
 
     note = request.form.get("note", "")
-    users.update({"note": note}, User.username == session["user"])
+    notes.insert({"username": session["user"], "content": note})
     return "Note saved successfully."
+
+@app.route("/editnote/<note_id>", methods=["GET", "POST"])
+def editnote(note_id):
+    if "user" not in session:
+        return redirect("/login")
+ 
+    note = notes.get((Note.id == note_id) & (Note.username == session["user"]))
+    if not note:
+        return redirect("/dashboard")
+ 
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        content = request.form.get("content", "").strip()
+        notes.update({"title": title, "content": content},
+                     (Note.id == note_id) & (Note.username == session["user"]))
+        return redirect("/dashboard")
+ 
+    return render_template("editnote.html", note=note)
+ 
+ 
+@app.route("/deletenote/<note_id>")
+def deletenote(note_id):
+    if "user" not in session:
+        return redirect("/login")
+ 
+    notes.remove((Note.id == note_id) & (Note.username == session["user"]))
+    return redirect("/dashboard")
 
 @app.route("/logout")
 def logout():
