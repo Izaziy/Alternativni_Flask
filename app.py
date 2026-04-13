@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, session
 from tinydb import TinyDB, Query
 
 app = Flask(__name__, template_folder="templates1")
-app.secret_key = "superskrivnostnikljuc"
+app.secret_key = "superskrivnostnikljuc67"
 
 db = TinyDB("db.json")
 users = db.table("users")
@@ -30,7 +30,7 @@ def register():
         elif users.search(User.username == username):
             error = "Username already exists."
         else:
-            users.insert({"username": username, "password": password, "note": ""})
+            users.insert({"username": username, "password": password})
             return redirect("/login")
 
     return render_template("register.html", error=error)
@@ -78,15 +78,6 @@ def addnote():
  
     return redirect("/dashboard")
 
-@app.route("/savenote", methods=["POST"])
-def savenote():
-    if "user" not in session:
-        return redirect("/login")
-
-    note = request.form.get("note", "")
-    notes.insert({"username": session["user"], "content": note})
-    return "Note saved successfully."
-
 @app.route("/editnote/<note_id>", methods=["GET", "POST"])
 def editnote(note_id):
     if "user" not in session:
@@ -106,7 +97,7 @@ def editnote(note_id):
     return render_template("editnote.html", note=note)
  
  
-@app.route("/deletenote/<note_id>")
+@app.route("/deletenote/<note_id>", methods=["POST"])
 def deletenote(note_id):
     if "user" not in session:
         return redirect("/login")

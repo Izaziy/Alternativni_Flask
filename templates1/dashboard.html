@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             background-color: #f0f2f5;
@@ -26,12 +24,19 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        h1 {
+        .header h1 {
             margin: 0;
             font-size: 22px;
         }
 
-        a.logout {
+        .header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .header .logout {
             background-color: #e74c3c;
             color: white;
             padding: 8px 16px;
@@ -39,11 +44,12 @@
             text-decoration: none;
         }
 
-        a.logout:hover {
+        .header .logout:hover {
             background-color: #c0392b;
         }
 
-        .add-note {
+        .add-note,
+        .notes-section {
             background: white;
             padding: 20px;
             border-radius: 8px;
@@ -51,7 +57,8 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .add-note h2 {
+        .add-note h2,
+        .notes-section h2 {
             margin-top: 0;
             font-size: 18px;
         }
@@ -69,7 +76,7 @@
         }
 
         textarea {
-            height: 80px;
+            height: 100px;
             resize: vertical;
         }
 
@@ -94,25 +101,24 @@
         }
 
         .note-card {
-            background: white;
+            background: #fafafa;
             padding: 16px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
             display: flex;
             flex-direction: column;
+            min-height: 220px;
         }
 
         .note-card h3 {
-            margin: 0 0 8px 0;
+            margin: 0 0 10px 0;
             font-size: 16px;
             color: #2c3e50;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
         }
 
         .note-card p {
             flex: 1;
-            margin: 0 0 12px 0;
+            margin: 0 0 14px 0;
             font-size: 14px;
             color: #555;
             white-space: pre-wrap;
@@ -122,31 +128,30 @@
         .note-actions {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
-        a.btn-edit {
+        .note-actions a,
+        .note-actions button {
             background-color: #3498db;
             color: white;
-            padding: 6px 14px;
-            border-radius: 4px;
+            padding: 8px 14px;
+            border-radius: 5px;
+            border: none;
             text-decoration: none;
+            cursor: pointer;
             font-size: 13px;
         }
 
-        a.btn-edit:hover {
+        .note-actions button {
+            background-color: #e74c3c;
+        }
+
+        .note-actions a:hover {
             background-color: #2980b9;
         }
 
-        a.btn-delete {
-            background-color: #e74c3c;
-            color: white;
-            padding: 6px 14px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 13px;
-        }
-
-        a.btn-delete:hover {
+        .note-actions button:hover {
             background-color: #c0392b;
         }
 
@@ -156,39 +161,44 @@
         }
     </style>
 </head>
-
 <body>
-    <h1>Dashboard</h1>
-    <div class="header"></div>
-    <p>Welcome mr. <strong>{{ user }}</strong></p>
-    <a class="logout" href="/logout">Logout</a>
+    <div class="header">
+        <h1>Osebni zapiski</h1>
+        <div class="user-info">
+            <span>Dobrodošel, <strong>{{ user }}</strong></span>
+            <a class="logout" href="/logout">Logout</a>
+        </div>
     </div>
+
     <div class="add-note">
-        <h2>Add a new masterpiece(note)</h2>
+        <h2>Dodaj nov zapis</h2>
         <form action="/addnote" method="POST">
-            <input type="text" name="title" placeholder="Naslov zapiseka" required>
+            <input type="text" name="title" placeholder="Naslov zapiska" required>
             <textarea name="content" placeholder="Vsebina zapiska"></textarea>
-            <button type="submit">Dodaj zapisk</button>
+            <button type="submit">Shrani zapis</button>
         </form>
     </div>
 
-
-    <script>
-        function savenote() {
-            var notetext = document.getElementById("note").value;
-            $.ajax({
-                url: "/savenote",
-                method: "POST",
-                data: { note: notetext },
-                success: function (odgovor) {
-                    $("#rezultat").text(odgovor);
-                },
-                error: function (xhr) {
-                    $("#rezultat").text("Error saving note: " + xhr.statusText);
-                }
-            });
-        }
-    </script>
+    <div class="notes-section">
+        <h2>Moji zapiski</h2>
+        {% if notes %}
+            <div class="notes-grid">
+                {% for note in notes %}
+                    <div class="note-card">
+                        <h3>{{ note.title or 'Brez naslova' }}</h3>
+                        <p>{{ note.content or 'Brez vsebine' }}</p>
+                        <div class="note-actions">
+                            <a href="/editnote/{{ note.id }}">Uredi</a>
+                            <form action="/deletenote/{{ note.id }}" method="POST" style="margin: 0;">
+                                <button type="submit" onclick="return confirm('Ali res želite izbrisati ta zapis?');">Izbriši</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-notes">Še nimaš nobenega zapiska. Ustvari svoj prvi zapis!</p>
+        {% endif %}
+    </div>
 </body>
-
 </html>

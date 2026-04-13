@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uredi zapis</title>
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-family: Arial, sans-serif;
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 10px;
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Uredi zapis</h1>
+        <form action="/editnote/{{ note.id }}" method="POST">
+            <input type="text" name="title" value="{{ note.title }}" placeholder="Naslov zapiska" required>
+            <textarea name="content" placeholder="Vsebina zapiska">{{ note.content }}</textarea>
+            <button type="submit">Shrani spremembe</button>
+        </form>
+        <p><a href="/dashboard">Nazaj na dashboard</a></p>
+    </div>
+</body>
+</html>
