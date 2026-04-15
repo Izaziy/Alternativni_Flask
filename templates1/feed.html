@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed</title>
+
+</head>
+<body>
+ 
+<div class="header">
+    <h1>Feed</h1>
+    <div class="nav">
+        <span>Zdravo, <strong>{{ user }}</strong></span>
+        <a href="/dashboard">Zapiski</a>
+        <a class="logout" href="/logout">Odjava</a>
+    </div>
+</div>
+ 
+<div class="new-post">
+    <h2>Nova objava</h2>
+    <form action="/addpost" method="POST" enctype="multipart/form-data">
+        <textarea name="content" placeholder="Kaj razmišljaš?"></textarea>
+        <input type="file" name="image" accept="image/*">
+        <button type="submit">Objavi</button>
+    </form>
+</div>
+ 
+<div class="feed">
+    {% if posts %}
+        {% for post in posts %}
+        <div class="post-card">
+            <div class="post-header">
+                <span class="post-author"> {{ post.username }}</span>
+                <span class="post-time">
+                    {% set ts = post.timestamp // 1000 %}
+                    {{ ts | int }}
+                </span>
+            </div>
+            {% if post.content %}
+            <div class="post-content">{{ post.content }}</div>
+            {% endif %}
+            {% if post.image %}
+            <img class="post-image" src="/static/{{ post.image }}" alt="Slika objave">
+            {% endif %}
+            {% if post.username == user %}
+            <div class="post-footer">
+                <form action="/deletepost/{{ post.id }}" method="POST">
+                    <button class="btn-delete" type="submit"
+                            onclick="return confirm('Izbriši to objavo?')">🗑️ Izbriši</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-posts">Še ni objav. Bodi prvi!</p>
+    {% endif %}
+</div>
+ 
+</body>
+</html>
