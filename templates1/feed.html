@@ -167,11 +167,12 @@
  
 <div class="new-post">
     <h2>Nova objava</h2>
-    <form action="/addpost" method="POST" enctype="multipart/form-data">
+    <form id="postForm" action="/addpost" method="POST" enctype="multipart/form-data">
         <textarea name="content" placeholder="Kaj razmišljaš?"></textarea>
         <input type="file" name="image" accept="image/*">
         <button type="submit">Objavi</button>
     </form>
+    <div id="rezultat" style="margin-top:10px; color:#333;"></div>
 </div>
  
 <div class="feed">
@@ -206,5 +207,37 @@
     {% endif %}
 </div>
  
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+$(function() {
+    $('#postForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        $.ajax({
+            url: '/addpost',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(odgovor) {
+                if (odgovor.success) {
+                    $('#rezultat').text('Objava je bila uspešno dodana.');
+                    setTimeout(function() {
+                        location.reload();
+                    }, 500);
+                } else {
+                    $('#rezultat').text('Napaka pri shranjevanju objave.');
+                }
+            },
+            error: function() {
+                $('#rezultat').text('Napaka pri pošiljanju zahteve.');
+            }
+        });
+    });
+});
+</script>
+
 </body>
 </html>

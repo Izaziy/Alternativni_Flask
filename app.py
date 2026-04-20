@@ -1,7 +1,7 @@
 import os
 import time
 
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, jsonify
 from tinydb import TinyDB, Query
 
 app = Flask(__name__, template_folder="templates1")
@@ -148,7 +148,10 @@ def addpost():
             "timestamp": int(time.time() * 1000),
             "id": str(int(time.time() * 1000))
         })
- 
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return jsonify(success=True)
+
     return redirect("/feed")
  
  
