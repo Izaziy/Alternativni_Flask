@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ profile_user.username }} – Profil</title>
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+ 
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+ 
+        .header h1 { margin: 0; font-size: 22px; }
+ 
+        .header .nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+ 
+        .header .nav a {
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+        }
+ 
+        a.btn-feed { background-color: #3498db; }
+        a.btn-feed:hover { background-color: #2980b9; }
+ 
+        a.btn-notes { background-color: #4CAF50; }
+        a.btn-notes:hover { background-color: #45a049; }
+ 
+        a.btn-settings { background-color: #7f8c8d; }
+        a.btn-settings:hover { background-color: #636e72; }
+ 
+        a.logout { background-color: #e74c3c; }
+        a.logout:hover { background-color: #c0392b; }
+ 
+        .profile-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+ 
+        .avatar-lg {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+ 
+        .avatar-placeholder-lg {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+ 
+        .profile-info { flex: 1; }
+ 
+        .profile-info h2 { margin: 0 0 6px 0; font-size: 20px; }
+ 
+        .profile-bio {
+            font-size: 14px;
+            color: #555;
+            margin: 0 0 12px 0;
+        }
+ 
+        .profile-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 12px;
+        }
+ 
+        .profile-stats span strong { color: #2c3e50; }
+ 
+        .btn-follow {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+ 
+        .btn-follow:hover { background-color: #2980b9; }
+ 
+        .btn-unfollow {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+ 
+        .btn-unfollow:hover { background-color: #c0392b; }
+ 
+        .btn-edit-profile {
+            display: inline-block;
+            background-color: #7f8c8d;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+ 
+        .btn-edit-profile:hover { background-color: #636e72; }
+ 
+        .posts-section {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+ 
+        .posts-section h3 {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 12px;
+        }
+ 
+        .post-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+ 
+        .post-content {
+            padding: 14px 16px;
+            font-size: 14px;
+            color: #444;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+ 
+        .post-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            display: block;
+        }
+ 
+        .no-posts { color: #888; font-style: italic; }
+    </style>
+</head>
+<body>
+ 
+<div class="header">
+    <h1>Profil</h1>
+    <div class="nav">
+        <span>Zdravo, <strong>{{ user }}</strong></span>
+        <a class="btn-feed" href="/feed">Feed</a>
+        <a class="btn-notes" href="/dashboard">Zapiski</a>
+        <a class="btn-settings" href="/settings">⚙️ Nastavitve</a>
+        <a class="logout" href="/logout">Odjava</a>
+    </div>
+</div>
+ 
+<div class="profile-card">
+    {% if profile_user.avatar %}
+        <img class="avatar-lg" src="/static/{{ profile_user.avatar }}" alt="avatar">
+    {% else %}
+        <div class="avatar-placeholder-lg">{{ profile_user.username[0].upper() }}</div>
+    {% endif %}
+ 
+    <div class="profile-info">
+        <h2>{{ profile_user.username }}</h2>
+        <p class="profile-bio">{{ profile_user.bio or 'Ni opisa.' }}</p>
+        <div class="profile-stats">
+            <span><strong>{{ follower_count }}</strong> sledilcev</span>
+            <span><strong>{{ following_count }}</strong> sledi</span>
+            <span><strong>{{ user_posts | length }}</strong> objav</span>
+        </div>
+ 
+        {% if is_own %}
+            <a class="btn-edit-profile" href="/settings">✏️ Uredi profil</a>
+        {% elif is_following %}
+            <form action="/unfollow/{{ profile_user.username }}" method="POST" style="display:inline;">
+                <button class="btn-unfollow" type="submit">Ne sledi več</button>
+            </form>
+        {% else %}
+            <form action="/follow/{{ profile_user.username }}" method="POST" style="display:inline;">
+                <button class="btn-follow" type="submit">+ Sledi</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+ 
+<div class="posts-section">
+    <h3>Objave</h3>
+    {% if user_posts %}
+        {% for post in user_posts %}
+        <div class="post-card">
+            {% if post.content %}
+            <div class="post-content">{{ post.content }}</div>
+            {% endif %}
+            {% if post.image %}
+            <img class="post-image" src="/static/{{ post.image }}" alt="Slika">
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-posts">Še ni objav.</p>
+    {% endif %}
+</div>
+ 
+</body>
+</html>

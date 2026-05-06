@@ -167,39 +167,102 @@
         <div class="user-info">
             <span>Dobrodošel, <strong>{{ user }}</strong></span>
             <a class="btn-feed" href = "/feed">Feed</a>
+            <a class="btn-profile" href="/profile/{{ user }}">Profils</a>
+            <a class="btn-settings" href="/settings">Nastavitve</a>
             <a class="logout" href="/logout">Logout</a>
         </div>
     </div>
 
     <div class="add-note">
         <h2>Dodaj nov zapis</h2>
-        <form action="/addnote" method="POST">
-            <input type="text" name="title" placeholder="Naslov zapiska" required>
-            <textarea name="content" placeholder="Vsebina zapiska"></textarea>
+        <form id="noteForm">
+            <input type="text" id="noteTitle" placeholder="Naslov zapiska" required>
+            <textarea id="noteContent" placeholder="Vsebina zapiska"></textarea>
             <button type="submit">Shrani zapis</button>
         </form>
+        <div id="message" style="margin-top: 10px;"></div>
     </div>
 
     <div class="notes-section">
         <h2>Moji zapiski</h2>
-        {% if notes %}
-            <div class="notes-grid">
-                {% for note in notes %}
-                    <div class="note-card">
-                        <h3>{{ note.title or 'Brez naslova' }}</h3>
-                        <p>{{ note.content or 'Brez vsebine' }}</p>
-                        <div class="note-actions">
-                            <a href="/editnote/{{ note.id }}">Uredi</a>
-                            <form action="/deletenote/{{ note.id }}" method="POST" style="margin: 0;">
-                                <button type="submit" onclick="return confirm('Ali res želite izbrisati ta zapis?');">Izbriši</button>
-                            </form>
+        <div id="notesList">
+            {% if notes %}
+                <div class="notes-grid">
+                    {% for note in notes %}
+                        <div class="note-card" data-note-id="{{ note.id }}">
+                            <h3>{{ note.title or 'Brez naslova' }}</h3>
+                            <p>{{ note.content or 'Brez vsebine' }}</p>
+                            <div class="note-actions">
+                                <a href="/editnote/{{ note.id }}">Uredi</a>
+                                <button type="button" class="delete-note-btn" data-note-id="{{ note.id }}" onclick="deleteNote('{{ note.id }}')">Izbriši</button>
+                            </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="no-notes">Še nimaš nobenega zapiska. Ustvari svoj prvi zapis!</p>
-        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="no-notes">Še nimaš nobenega zapiska. Ustvari svoj prvi zapis!</p>
+            {% endif %}
+        </div>
     </div>
+
+    <script>
+        document.getElementById("noteForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById("noteTitle").value;
+            const content = document.getElementById("noteContent").value;
+            const messageDiv = document.getElementById("message");
+            
+            fetch("/addnote", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: "title=" + encodeURIComponent(title) + "&content=" + encodeURIComponent(content)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    messageDiv.innerHTML = '<span style="color: green;">✓ Zapis dodan!</span>';
+                    document.getElementById("noteTitle").value = "";
+                    document.getElementById("noteContent").value = "";
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    messageDiv.innerHTML = '<span style="color: red;">✗ Napaka: ' + data.message + '</span>';
+                }
+            })
+            .catch(error => {
+                messageDiv.innerHTML = '<span style="color: red;">✗ Napaka pri komunikaciji!</span>';
+                console.error("Napaka:", error);
+            });
+        });
+        
+        function deleteNote(noteId) {
+            if (!confirm("Ali res želite izbrisati ta zapis?")) {
+                return;
+            }
+            
+            fetch("/deletenote/" + noteId, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector('[data-note-id="' + noteId + '"]').remove();
+                    alert("Zapis izbrisan!");
+                } else {
+                    alert("Napaka pri brisanju zapiska!");
+                }
+            })
+            .catch(error => {
+                alert("Napaka pri komunikaciji!");
+                console.error("Napaka:", error);
+            });
+        }
+    </script>
 </body>
 </html>

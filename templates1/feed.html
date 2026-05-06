@@ -161,7 +161,10 @@
     <div class="nav">
         <span>Zdravo, <strong>{{ user }}</strong></span>
         <a href="/dashboard">Zapiski</a>
+        <a class="btn-profile" href="/profile/{{ user }}">Profils</a>
+        <a class="btn-settings" href="/settings">Nastavitve</a>
         <a class="logout" href="/logout">Odjava</a>
+        
     </div>
 </div>
  
@@ -178,12 +181,14 @@
 <div class="feed">
     {% if posts %}
         {% for post in posts %}
-        <div class="post-card">
+        <div class="post-card" data-post-id="{{ post.id }}">
             <div class="post-header">
-                <span class="post-author"> {{ post.username }}</span>
+                <span class="post-author">
+                    <a href="/profile/{{ post.username }}" style="color: inherit; text-decoration: none;">{{ post.username }}</a>
+                </span>
                 <span class="post-time">
-                    {% set ts = post.timestamp // 1000 %}
-                    {{ ts | int }}
+                    {% set ts = (post.timestamp // 1000) | int %}
+                    Pred nekaj časa
                 </span>
             </div>
             {% if post.content %}
@@ -194,10 +199,7 @@
             {% endif %}
             {% if post.username == user %}
             <div class="post-footer">
-                <form action="/deletepost/{{ post.id }}" method="POST">
-                    <button class="btn-delete" type="submit"
-                            onclick="return confirm('Izbriši to objavo?')">🗑️ Izbriši</button>
-                </form>
+                <button class="btn-delete" onclick="deletePost('{{ post.id }}')">🗑️ Izbriši</button>
             </div>
             {% endif %}
         </div>
@@ -223,20 +225,47 @@ $(function() {
             contentType: false,
             success: function(odgovor) {
                 if (odgovor.success) {
-                    $('#rezultat').text('Objava je bila uspešno dodana.');
+                    $('#rezultat').html('<span style="color: green;">✓ Objava je bila uspešno dodana.</span>');
+                    this.reset();
                     setTimeout(function() {
                         location.reload();
                     }, 500);
                 } else {
-                    $('#rezultat').text('Napaka pri shranjevanju objave.');
+                    $('#rezultat').html('<span style="color: red;">✗ Napaka pri shranjevanju objave.</span>');
                 }
-            },
+            }.bind(this),
             error: function() {
-                $('#rezultat').text('Napaka pri pošiljanju zahteve.');
+                $('#rezultat').html('<span style="color: red;">✗ Napaka pri pošiljanju zahteve.</span>');
             }
         });
     });
 });
+
+function deletePost(postId) {
+    if (!confirm("Ali res želite izbrisati to objavo?")) {
+        return;
+    }
+    
+    fetch("/deletepost/" + postId, {
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.querySelector('[data-post-id="' + postId + '"]').remove();
+            alert("Objava izbrisana!");
+        } else {
+            alert("Napaka pri brisanju objave!");
+        }
+    })
+    .catch(error => {
+        alert("Napaka pri komunikaciji!");
+        console.error("Napaka:", error);
+    });
+}
 </script>
 
 </body>
