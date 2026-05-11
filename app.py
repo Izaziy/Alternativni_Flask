@@ -21,15 +21,10 @@ UPLOAD_FOLDER = os.path.join("static", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
-    """Preveri ali je datoteka dovoljen tip."""
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def save_file(file):
-    """
-    Shrani naloženo datoteko in vrne pot do nje.
-    Če datoteke ni ali ni dovoljena, vrne None.
-    """
     if not file or not file.filename:
         return None
     
